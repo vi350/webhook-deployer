@@ -9,38 +9,38 @@ import (
 	"os"
 )
 
+func performPull(repoPath string, privateKeyPath string) error {
+	repo, err := git.PlainOpen(repoPath) // Open the repository
+	if err != nil {
+		return err
+	}
+	auth, err := ssh.NewPublicKeysFromFile("git", privateKeyPath, "") // Create the authentication
+	if err != nil {
+		return err
+	}
+	worktree, err := repo.Worktree() // Get the working directory for the repository
+	if err != nil {
+		return err
+	}
+	err = worktree.Pull(&git.PullOptions{ // Pull changes from the remote
+		RemoteName: "origin",
+		Auth:       auth,
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Println("Pull successful")
+	return nil
+}
+
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Panicf("Error loading .env file: %v", err)
 	}
 
-	// Open the repository
-	repo, err := git.PlainOpen(os.Getenv("REPO_PATH"))
+	err = performPull(os.Getenv("REPO_PATH"), os.Getenv("PRIVATE_KEY_PATH"))
 	if err != nil {
 		log.Panic(err)
 	}
-
-	// Set up the SSH authentication
-	auth, err := ssh.NewPublicKeysFromFile("git", os.Getenv("PRIVATE_KEY_PATH"), "")
-	if err != nil {
-		log.Panic(err)
-	}
-
-	// Get the worktree of the repository
-	worktree, err := repo.Worktree()
-	if err != nil {
-		log.Panic(err)
-	}
-
-	// Pull the latest changes from the origin repository using key-based authentication
-	err = worktree.Pull(&git.PullOptions{
-		RemoteName: "origin",
-		Auth:       auth,
-	})
-	if err != nil {
-		log.Panic(err)
-	}
-
-	fmt.Println("Pull successful")
 }
