@@ -25,6 +25,7 @@ func New() (*App, error) {
 	}
 
 	a.echo = echo.New()
+	a.echo.Use(mw.Logger)
 	a.echo.GET("/status", a.e.Status)
 	a.echo.POST("/update", a.e.Update, mw.AuthorizePushEvent)
 	return a, nil

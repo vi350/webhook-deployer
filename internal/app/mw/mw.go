@@ -88,3 +88,14 @@ func messageMAC(signature string) ([]byte, func() hash.Hash, error) {
 	}
 	return buf, hashFunc, nil
 }
+
+func Logger(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		fmt.Println("Request")
+		fmt.Println(ctx.Request().Method, ctx.Request().URL)
+		fmt.Println(ctx.Request().Header)
+		fmt.Println(ctx.Request().Body)
+		fmt.Println("=================")
+		return next(ctx)
+	}
+}
