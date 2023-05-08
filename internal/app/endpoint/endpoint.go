@@ -1,7 +1,9 @@
 package endpoint
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 )
 
@@ -30,14 +32,17 @@ func (e *Endpoint) Status(ctx echo.Context) error {
 }
 
 func (e *Endpoint) Update(ctx echo.Context) error {
+	fmt.Println("update started")
 	err := e.service.PerformPull("/repo", "/.ssh/id_rsa")
 	if err != nil {
-		return err
+		log.Panic(err)
 	}
+	fmt.Println("pulled")
 	err = e.service.RestartContainers("/repo", "/repo/docker-compose.yml")
 	if err != nil {
-		return err
+		log.Panic(err)
 	}
+	fmt.Println("restarted")
 	err = ctx.JSON(http.StatusOK, "OK")
 	// TODO: tag the commit as deployed
 	return nil
