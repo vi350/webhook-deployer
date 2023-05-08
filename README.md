@@ -22,8 +22,8 @@ git submodule foreach git pull origin master
 /var/run/docker.sock:/var/run/docker.sock
 ./:/repo/
 ~/.ssh/:/root/.ssh/
+./.env:/.env
 ```
-.env будет скопирован в образ из докерфайла
 контекст билда должен соответствовать папке субмодуля
 
 ### архитектура
