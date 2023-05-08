@@ -33,7 +33,7 @@ func (e *Endpoint) Status(ctx echo.Context) error {
 
 func (e *Endpoint) Update(ctx echo.Context) error {
 	fmt.Println("update started")
-	err := e.service.PerformPull("/repo", "/.ssh/id_rsa")
+	err := e.service.PerformPull("/repo", "/root/.ssh/id_rsa")
 	if err != nil {
 		log.Panic(err)
 	}
