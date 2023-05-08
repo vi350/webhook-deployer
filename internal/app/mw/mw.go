@@ -27,8 +27,8 @@ func AuthorizePushEvent(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, "body read error")
 		}
 		signature := ctx.Request().Header.Get("X-Hub-Signature-256")
-		secret, err := hex.DecodeString(os.Getenv("WEBHOOK_SECRET"))
-		if err == nil && len(signature) > 0 {
+		secret := []byte(os.Getenv("WEBHOOK_SECRET"))
+		if len(secret) > 0 && len(signature) > 0 {
 			messageMAC, hashFunc, err := messageMAC(signature) // check signature
 			if err != nil || !checkMAC(body, messageMAC, secret, hashFunc) {
 				return echo.NewHTTPError(http.StatusForbidden, "wrong signature")
