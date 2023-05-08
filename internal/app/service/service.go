@@ -11,7 +11,6 @@ import (
 	"golang.org/x/net/context"
 	"os"
 	"strings"
-	"time"
 )
 
 type Service struct {
@@ -58,30 +57,33 @@ func (s *Service) RestartContainers(workingDir string, composeFilePath string) e
 	}
 
 	cli, _ := cliCommand.NewDockerCli()
-	minute := time.Minute
 	composeService := composeCompose.NewComposeService(cli)
 
-	// TODO: split into stop and remove, check if containers are running
-	// TODO: make exclusion for specific container (need to split)
-	err = composeService.Down(ctx, project.Name, composeApi.DownOptions{ // Stop and remove containers
-		RemoveOrphans: true,
-		Project:       project,
-		Timeout:       &minute,
-		Images:        "local",
-		Volumes:       false,
+	var services []string
+	for _, service := range project.Services {
+		if !strings.HasSuffix(service.Name, "deployer") { // we don't want to stop the deployer container
+			services = append(services, service.Name)
+		}
+	}
+	err = composeService.Remove(ctx, project.Name, composeApi.RemoveOptions{ // Remove (actually includes stop) containers
+		Project:  project,
+		Stop:     true,
+		Services: services,
 	})
 	if err != nil {
 		return err
 	}
 
-	var services []string
+	services = make([]string, 0) // clear slice
 	for i, service := range project.Services {
-		if service.Build == nil {
-			continue
+		if !strings.HasSuffix(service.Name, "deployer") { // we don't want to create the deployer container
+			if service.Build == nil {
+				continue
+			}
+			service.PullPolicy = composeTypes.PullPolicyBuild
+			project.Services[i] = service
+			services = append(services, service.Name)
 		}
-		service.PullPolicy = composeTypes.PullPolicyBuild
-		project.Services[i] = service
-		services = append(services, service.Name)
 	}
 	err = composeService.Create(ctx, project, composeApi.CreateOptions{
 		Services: services,
@@ -90,7 +92,10 @@ func (s *Service) RestartContainers(workingDir string, composeFilePath string) e
 		return err
 	}
 
-	err = composeService.Start(ctx, project.Name, composeApi.StartOptions{})
+	err = composeService.Start(ctx, project.Name, composeApi.StartOptions{
+		Project:  project,
+		Services: services,
+	})
 	if err != nil {
 		return err
 	}

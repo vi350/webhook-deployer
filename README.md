@@ -12,7 +12,7 @@ git submodule add https://github.com/vi350/webhook-deployer
 
 ```bash
 git submodule init
-git submodule update
+git submodule update --remote
 git submodule foreach git pull origin master
 ```
 
@@ -20,7 +20,7 @@ git submodule foreach git pull origin master
 
 ```text
 /var/run/docker.sock:/var/run/docker.sock
-./:/repo
+./:/repo/
 ~/.ssh/:/root/.ssh/
 ```
 .env будет скопирован в образ из докерфайла
