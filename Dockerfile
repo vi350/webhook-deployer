@@ -15,6 +15,6 @@ RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o binaryapp .
 FROM scratch AS runner
 
 COPY ./.env ./
-COPY --from=build /app/binaryapp .
+COPY --from=builder /app/binaryapp .
 
 CMD ["./app"]
