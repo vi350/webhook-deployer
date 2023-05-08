@@ -8,10 +8,12 @@
 git submodule add https://github.com/vi350/webhook-deployer
 ```
 
-Для обновления (например сразу после пулла):
+Для обновления:
 
 ```bash
+git submodule init
 git submodule update
+git submodule foreach git pull origin master
 ```
 
 Для запуска нужно создать контейнер и примаунтить к нему:
