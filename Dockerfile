@@ -16,4 +16,4 @@ FROM scratch AS runner
 
 COPY --from=builder /app/binaryapp .
 
-CMD ["./app"]
+CMD ["./binaryapp"]
